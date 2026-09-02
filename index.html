@@ -1,0 +1,276 @@
+<title>Launchpad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f6f4ee;
+    --surface: #ffffff;
+    --surface-hover: #fbf9f4;
+    --border: #ddd7c9;
+    --text: #1c1a16;
+    --text-dim: #6c675c;
+    --accent: #a85a1e;
+    --accent-soft: rgba(168, 90, 30, 0.10);
+    --accent-ring: rgba(168, 90, 30, 0.35);
+    --shadow: 0 1px 2px rgba(30, 20, 5, 0.04), 0 8px 24px rgba(30, 20, 5, 0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12100e;
+      --surface: #1a1815;
+      --surface-hover: #201d19;
+      --border: #322d26;
+      --text: #ece7dd;
+      --text-dim: #9c9689;
+      --accent: #e0993f;
+      --accent-soft: rgba(224, 153, 63, 0.12);
+      --accent-ring: rgba(224, 153, 63, 0.4);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #12100e;
+    --surface: #1a1815;
+    --surface-hover: #201d19;
+    --border: #322d26;
+    --text: #ece7dd;
+    --text-dim: #9c9689;
+    --accent: #e0993f;
+    --accent-soft: rgba(224, 153, 63, 0.12);
+    --accent-ring: rgba(224, 153, 63, 0.4);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 28px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) 1.5rem 4rem;
+  }
+
+  header.intro {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: linear-gradient(155deg, var(--accent), #c76b23 65%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: #fffaf2;
+    flex-shrink: 0;
+  }
+
+  h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 500;
+    font-size: clamp(2.1rem, 5vw, 2.8rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .tagline {
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    line-height: 1.55;
+    max-width: 46ch;
+    margin: 0;
+  }
+
+  .eyebrow {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 0.9rem;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.25rem;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    outline-offset: 3px;
+  }
+
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-ring);
+    background: var(--surface-hover);
+  }
+
+  .card:focus-visible {
+    outline: 2px solid var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card { transition: none; }
+    .card:hover { transform: none; }
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tile {
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    background: var(--tile-bg, var(--accent-soft));
+    flex-shrink: 0;
+  }
+
+  .go {
+    color: var(--text-dim);
+    font-size: 1rem;
+    opacity: 0;
+    transform: translate(-3px, 3px);
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+
+  .card:hover .go, .card:focus-visible .go {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .card h2 {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+
+  .card p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+
+  .card .domain {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: auto;
+    padding-top: 0.15rem;
+  }
+
+  footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+  }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <div class="avatar" id="avatarInitial">S</div>
+    <p class="eyebrow">Sahil John</p>
+    <h1>Everything I've built, in one place.</h1>
+    <p class="tagline">A running index of the sites and tools I've shipped — pick one below.</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>Edit the <code>LINKS</code> array in this file to add, remove, or reorder projects.</footer>
+</div>
+
+<script>
+  // Edit this list — one entry per site. `icon` is any emoji; `tileColor` is optional (CSS color).
+  const LINKS = [
+    {
+      title: "PROSUP",
+      domain: "prosup-jet.vercel.app",
+      url: "https://prosup-jet.vercel.app/",
+      description: "Project workspace, hosted on Vercel.",
+      icon: "🛠️",
+      tileColor: "rgba(168, 90, 30, 0.12)"
+    },
+    {
+      title: "ITP Tracker",
+      domain: "itptracker-weld-five.vercel.app",
+      url: "https://itptracker-weld-five.vercel.app/dashboard",
+      description: "Dashboard for tracking ITPs.",
+      icon: "📋",
+      tileColor: "rgba(60, 110, 90, 0.14)"
+    }
+  ];
+
+  const grid = document.getElementById("grid");
+
+  LINKS.forEach(link => {
+    const a = document.createElement("a");
+    a.className = "card";
+    a.href = link.url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.style.setProperty("--tile-bg", link.tileColor || "");
+
+    a.innerHTML = `
+      <div class="card-top">
+        <div class="tile">${link.icon || "🔗"}</div>
+        <span class="go">↗</span>
+      </div>
+      <div>
+        <h2></h2>
+        <p></p>
+      </div>
+      <span class="domain"></span>
+    `;
+
+    a.querySelector("h2").textContent = link.title;
+    a.querySelector("p").textContent = link.description;
+    a.querySelector(".domain").textContent = link.domain;
+
+    grid.appendChild(a);
+  });
+</script>
