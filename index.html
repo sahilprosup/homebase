@@ -37,14 +37,13 @@
   }
   .masthead h1 span { color: #ec3013; }
 
-  .listbar {
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-    padding: 16px 40px; border-bottom: 2px solid rgba(243,242,242,0.22); flex-wrap: wrap;
+  .fab {
+    position: fixed; top: 24px; right: 24px; z-index: 5;
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    border: 0; background: #ec3013; color: #f3f2f2; cursor: pointer;
   }
-  .listbar .count {
-    font-size: 12px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
-    color: rgba(243,242,242,0.6);
-  }
+  .fab:hover { background: #ff563c; }
+  .fab:active { background: #ff9783; }
 
   .btn-primary {
     display: inline-flex; align-items: center; gap: 8px;
@@ -54,7 +53,7 @@
   .btn-primary:hover { background: #ff563c; }
   .btn-primary:active { background: #ff9783; }
 
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); border-bottom: 1px solid rgba(243,242,242,0.14); }
 
   .card {
     display: flex; flex-direction: column; gap: 14px; min-height: 290px;
@@ -96,24 +95,20 @@
 
   @media (max-width: 560px) {
     .masthead { padding: 48px 20px 40px; }
-    .listbar { padding: 14px 20px; }
+    .fab { top: 16px; right: 16px; }
   }
 </style>
 </head>
 <body>
 
+<button type="button" class="fab" id="openAdd" aria-label="Add link" title="Add link">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 5v14M5 12h14"></path></svg>
+</button>
+
 <section class="masthead">
   <img src="assets/proline-logo.png" alt="Proline — Melbourne · Sydney — Built not bought">
   <h1>Sahil's <span>Brain</span></h1>
 </section>
-
-<div class="listbar">
-  <div class="count" id="countLabel">MY WEBSITES — 00</div>
-  <button type="button" class="btn-primary" id="openAdd">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M12 5v14M5 12h14"></path></svg>
-    Add link
-  </button>
-</div>
 
 <div class="grid" id="grid"></div>
 
@@ -209,9 +204,6 @@
 
       grid.appendChild(card);
     });
-
-    document.getElementById("countLabel").textContent =
-      "MY WEBSITES — " + String(sites.length).padStart(2, "0");
   }
 
   const overlay = document.getElementById("overlay");
