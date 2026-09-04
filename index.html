@@ -107,8 +107,9 @@
   }
   .modal h3 { margin: 0 0 4px; font-weight: 800; font-size: 24px; text-transform: uppercase; letter-spacing: -0.02em; }
   .modal .subcopy { margin: 0 0 20px; font-size: 13px; color: rgba(243,242,242,0.6); }
-  .fields { display: flex; flex-direction: column; gap: 14px; }
-  .field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(243,242,242,0.6); margin-bottom: 6px; }
+  .fields { display: flex; flex-direction: column; gap: 18px; }
+  .field { display: flex; flex-direction: column; }
+  .field span { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(243,242,242,0.6); margin-bottom: 8px; }
   .field input {
     width: 100%; height: 40px; padding: 0 12px; font-family: inherit; font-size: 14px;
     color: #f3f2f2; background: #1a1918; border: 1px solid rgba(243,242,242,0.22); border-radius: 10px;
@@ -166,11 +167,7 @@
         <input id="fName" type="text" placeholder="ITP Tracker" maxlength="60">
       </label>
       <label class="field">
-        <span>What it is</span>
-        <input id="fDesc" type="text" placeholder="Site evidence, photographed and filed" maxlength="140">
-      </label>
-      <label class="field">
-        <span>Address</span>
+        <span>Link</span>
         <input id="fUrl" type="text" placeholder="itptracker.vercel.app" maxlength="300">
       </label>
     </div>
@@ -314,7 +311,6 @@
 
   const overlay = document.getElementById("overlay");
   const fName = document.getElementById("fName");
-  const fDesc = document.getElementById("fDesc");
   const fUrl = document.getElementById("fUrl");
   const modalTitle = document.getElementById("modalTitle");
   const modalSubcopy = document.getElementById("modalSubcopy");
@@ -323,7 +319,7 @@
 
   let editIndex = null;
 
-  function resetForm() { fName.value = ""; fDesc.value = ""; fUrl.value = ""; }
+  function resetForm() { fName.value = ""; fUrl.value = ""; }
 
   function openDialog(index) {
     editIndex = (typeof index === "number") ? index : null;
@@ -332,7 +328,6 @@
     if (editIndex !== null) {
       const site = sites[editIndex];
       fName.value = site.name || "";
-      fDesc.value = site.desc || "";
       fUrl.value = site.url || "";
       modalTitle.textContent = "Edit link";
       modalSubcopy.textContent = "Changes save straight away.";
@@ -361,21 +356,23 @@
 
   submitBtn.addEventListener("click", () => {
     const name = fName.value.trim();
-    const desc = fDesc.value.trim();
     const url = fUrl.value.trim();
 
     if (!name && !url) { closeDialog(); return; }
 
-    const site = {
-      name: name || url,
-      desc: desc || "No description yet.",
-      url: url.replace(/^https?:\/\//, "") || "—"
-    };
-
     if (editIndex !== null) {
-      sites[editIndex] = site;
+      const existing = sites[editIndex];
+      sites[editIndex] = {
+        name: name || url,
+        desc: existing.desc || "No description yet.",
+        url: url.replace(/^https?:\/\//, "") || "—"
+      };
     } else {
-      sites.push(site);
+      sites.push({
+        name: name || url,
+        desc: "No description yet.",
+        url: url.replace(/^https?:\/\//, "") || "—"
+      });
     }
 
     saveSites(sites);
