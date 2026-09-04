@@ -33,7 +33,7 @@
     padding: 24px 40px 16px;
     text-align: center;
   }
-  .masthead img { width: 240px; max-width: 100%; height: auto; }
+  .masthead img { width: 340px; max-width: 100%; height: auto; }
   .masthead h1 {
     margin: 12px 0 0; font-weight: 800; font-size: clamp(26px, 3.6vw, 40px);
     line-height: 0.9; letter-spacing: -0.04em; text-transform: uppercase;
@@ -52,9 +52,12 @@
 
   .grid {
     flex: 1; min-height: 0;
-    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-    gap: 20px; padding: 0 40px 24px; max-width: 1100px; width: 100%; margin: 0 auto;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 40px 24px;
+  }
+  .grid-inner {
+    display: grid; grid-template-columns: repeat(2, 260px);
+    grid-auto-rows: 195px; gap: 20px;
   }
 
   .card-wrap { position: relative; min-height: 0; }
@@ -133,11 +136,10 @@
     html, body { height: auto; }
     body { overflow: visible; }
     .masthead { padding: 40px 20px 32px; }
+    .masthead img { width: 220px; }
     .fab { top: 16px; right: 16px; }
-    .grid {
-      flex: none; grid-template-columns: 1fr; grid-template-rows: none;
-      padding: 0 20px 48px; gap: 16px;
-    }
+    .grid { flex: none; padding: 0 20px 48px; }
+    .grid-inner { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 16px; width: 100%; }
     .card-wrap { min-height: 220px; }
   }
 </style>
@@ -152,7 +154,7 @@
   </button>
 </section>
 
-<div class="grid" id="grid"></div>
+<div class="grid"><div class="grid-inner" id="grid"></div></div>
 
 <div class="overlay" id="overlay" hidden>
   <div class="modal">
