@@ -9,13 +9,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
-    min-height: 100vh;
+    display: flex; flex-direction: column;
     background: #1a1918;
     color: #f3f2f2;
     font-family: 'Archivo', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
   }
   a { color: #ff9783; text-underline-offset: 3px; }
   a:hover { color: #ffc4b8; }
@@ -26,14 +28,14 @@
   input::placeholder { color: rgba(243,242,242,0.4); }
 
   .masthead {
-    position: relative;
+    position: relative; flex: none;
     display: flex; flex-direction: column; align-items: center;
-    padding: 36px 40px 28px;
+    padding: 24px 40px 16px;
     text-align: center;
   }
-  .masthead img { width: 220px; max-width: 100%; height: auto; }
+  .masthead img { width: 160px; max-width: 100%; height: auto; }
   .masthead h1 {
-    margin: 20px 0 0; font-weight: 800; font-size: clamp(32px, 5vw, 56px);
+    margin: 12px 0 0; font-weight: 800; font-size: clamp(26px, 3.6vw, 40px);
     line-height: 0.9; letter-spacing: -0.04em; text-transform: uppercase;
     color: #ec3013;
   }
@@ -49,14 +51,18 @@
   .fab:active { background: #ff9783; }
 
   .grid {
+    flex: 1; min-height: 0;
     display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px; padding: 0 40px 64px; max-width: 1100px; margin: 0 auto;
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 20px; padding: 0 40px 24px; max-width: 1100px; width: 100%; margin: 0 auto;
   }
+
+  .card-wrap { position: relative; min-height: 0; }
 
   .card {
     position: relative; display: grid; place-items: center;
     grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
-    aspect-ratio: 4 / 3; padding: 32px; overflow: hidden;
+    width: 100%; height: 100%; padding: 28px; overflow: hidden;
     border: 1px solid rgba(243,242,242,0.12); border-radius: 20px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     text-decoration: none; color: inherit;
@@ -72,11 +78,21 @@
   .card .arrow { position: absolute; top: 20px; right: 22px; opacity: 0.45; }
   .card .name {
     position: relative; width: 100%; min-width: 0; text-align: center; color: #f3f2f2;
-    font-weight: 800; font-size: clamp(28px, 3.4vw, 44px); line-height: 0.95;
+    font-weight: 800; font-size: clamp(24px, 3vw, 40px); line-height: 0.95;
     letter-spacing: -0.03em; text-transform: uppercase; text-wrap: balance;
     overflow-wrap: break-word;
   }
   .card .rule { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); width: 36px; height: 3px; }
+
+  .edit-btn {
+    position: absolute; bottom: 14px; right: 16px; z-index: 2;
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(10,9,9,0.45); border: 1px solid rgba(243,242,242,0.2);
+    color: #f3f2f2; opacity: 0.6; cursor: pointer;
+    transition: opacity 120ms linear, background 120ms linear;
+  }
+  .edit-btn:hover { opacity: 1; background: rgba(10,9,9,0.7); }
 
   .overlay {
     position: fixed; inset: 0; display: grid; place-items: center;
@@ -106,12 +122,24 @@
     border-radius: 10px; color: #f3f2f2; font-weight: 800; font-size: 13px; cursor: pointer;
   }
   .btn-secondary:hover { background: rgba(243,242,242,0.08); }
+  .btn-remove {
+    display: block; margin: 14px 0 0; padding: 0; border: 0; background: transparent;
+    color: rgba(243,242,242,0.5); font-size: 12px; font-weight: 600; letter-spacing: 0.03em;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .btn-remove:hover { color: #ff7a5f; }
+  .btn-remove[hidden] { display: none; }
 
   @media (max-width: 640px) {
-    .masthead { padding: 48px 20px 40px; }
+    html, body { height: auto; }
+    body { overflow: visible; }
+    .masthead { padding: 40px 20px 32px; }
     .fab { top: 16px; right: 16px; }
-    .grid { grid-template-columns: 1fr; padding: 0 20px 48px; gap: 16px; }
-    .card { aspect-ratio: auto; min-height: 220px; }
+    .grid {
+      flex: none; grid-template-columns: 1fr; grid-template-rows: none;
+      padding: 0 20px 48px; gap: 16px;
+    }
+    .card-wrap { min-height: 220px; }
   }
 </style>
 </head>
@@ -129,8 +157,8 @@
 
 <div class="overlay" id="overlay" hidden>
   <div class="modal">
-    <h3>Add a link</h3>
-    <p class="subcopy">It joins the list straight away.</p>
+    <h3 id="modalTitle">Add a link</h3>
+    <p class="subcopy" id="modalSubcopy">It joins the list straight away.</p>
     <div class="fields">
       <label class="field">
         <span>Name</span>
@@ -149,6 +177,7 @@
       <button type="button" class="btn-primary" id="submitAdd">Add to list</button>
       <button type="button" class="btn-secondary" id="cancelAdd">Cancel</button>
     </div>
+    <button type="button" class="btn-remove" id="removeSite" hidden>Remove this link</button>
   </div>
 </div>
 
@@ -219,6 +248,7 @@
   let sites = loadSites();
 
   const ARROW_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f3f2f2" stroke-width="2" stroke-linecap="square"><path d="M7 17 17 7M9 7h8v8"></path></svg>';
+  const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>';
 
   function render() {
     const grid = document.getElementById("grid");
@@ -228,6 +258,9 @@
       const href = "https://" + site.url.replace(/^https?:\/\//, "");
       const num = String(i + 1).padStart(2, "0");
       const look = LOOKS[i % LOOKS.length];
+
+      const wrap = document.createElement("div");
+      wrap.className = "card-wrap";
 
       const card = document.createElement("a");
       card.className = "card";
@@ -266,7 +299,21 @@
       card.appendChild(name);
       card.appendChild(rule);
 
-      grid.appendChild(card);
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "edit-btn";
+      editBtn.setAttribute("aria-label", "Edit " + site.name);
+      editBtn.title = "Edit";
+      editBtn.innerHTML = EDIT_ICON;
+      editBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openDialog(i);
+      });
+
+      wrap.appendChild(card);
+      wrap.appendChild(editBtn);
+      grid.appendChild(wrap);
     });
   }
 
@@ -274,36 +321,76 @@
   const fName = document.getElementById("fName");
   const fDesc = document.getElementById("fDesc");
   const fUrl = document.getElementById("fUrl");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalSubcopy = document.getElementById("modalSubcopy");
+  const submitBtn = document.getElementById("submitAdd");
+  const removeBtn = document.getElementById("removeSite");
+
+  let editIndex = null;
 
   function resetForm() { fName.value = ""; fDesc.value = ""; fUrl.value = ""; }
 
-  function openDialog() {
+  function openDialog(index) {
+    editIndex = (typeof index === "number") ? index : null;
     overlay.hidden = false;
-    resetForm();
+
+    if (editIndex !== null) {
+      const site = sites[editIndex];
+      fName.value = site.name || "";
+      fDesc.value = site.desc || "";
+      fUrl.value = site.url || "";
+      modalTitle.textContent = "Edit link";
+      modalSubcopy.textContent = "Changes save straight away.";
+      submitBtn.textContent = "Save changes";
+      removeBtn.hidden = false;
+    } else {
+      resetForm();
+      modalTitle.textContent = "Add a link";
+      modalSubcopy.textContent = "It joins the list straight away.";
+      submitBtn.textContent = "Add to list";
+      removeBtn.hidden = true;
+    }
+
     fName.focus();
   }
   function closeDialog() {
     overlay.hidden = true;
+    editIndex = null;
     resetForm();
   }
 
-  document.getElementById("openAdd").addEventListener("click", openDialog);
+  document.getElementById("openAdd").addEventListener("click", () => openDialog());
   document.getElementById("cancelAdd").addEventListener("click", closeDialog);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) closeDialog(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !overlay.hidden) closeDialog(); });
 
-  document.getElementById("submitAdd").addEventListener("click", () => {
+  submitBtn.addEventListener("click", () => {
     const name = fName.value.trim();
     const desc = fDesc.value.trim();
     const url = fUrl.value.trim();
 
     if (!name && !url) { closeDialog(); return; }
 
-    sites.push({
+    const site = {
       name: name || url,
       desc: desc || "No description yet.",
       url: url.replace(/^https?:\/\//, "") || "—"
-    });
+    };
+
+    if (editIndex !== null) {
+      sites[editIndex] = site;
+    } else {
+      sites.push(site);
+    }
+
+    saveSites(sites);
+    render();
+    closeDialog();
+  });
+
+  removeBtn.addEventListener("click", () => {
+    if (editIndex === null) return;
+    sites.splice(editIndex, 1);
     saveSites(sites);
     render();
     closeDialog();
