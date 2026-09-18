@@ -56,8 +56,8 @@
     padding: 0 40px 24px;
   }
   .grid-inner {
-    display: grid; grid-template-columns: repeat(2, 340px);
-    grid-auto-rows: 255px; gap: 24px;
+    display: grid; grid-template-columns: repeat(auto-fit, 340px);
+    grid-auto-rows: 255px; gap: 24px; justify-content: center;
   }
 
   .card-wrap { position: relative; min-height: 0; }
@@ -65,7 +65,7 @@
   .card {
     position: relative; display: grid; place-items: center;
     grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
-    width: 100%; height: 100%; padding: 28px; overflow: hidden;
+    width: 100%; height: 100%; padding: clamp(14px, calc(var(--cw, 340px) * 0.08), 28px); overflow: hidden;
     border: 1px solid rgba(243,242,242,0.12); border-radius: 20px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
     text-decoration: none; color: inherit;
@@ -80,7 +80,7 @@
   .card .num { position: absolute; top: 20px; left: 24px; font-size: 11px; font-weight: 800; letter-spacing: 0.18em; }
   .card .name {
     position: relative; width: 100%; min-width: 0; text-align: center; color: #f3f2f2;
-    font-weight: 800; font-size: clamp(24px, 3vw, 40px); line-height: 0.95;
+    font-weight: 800; font-size: clamp(17px, calc(var(--cw, 340px) * 0.125), 40px); line-height: 0.95;
     letter-spacing: -0.03em; text-transform: uppercase; text-wrap: balance;
     overflow-wrap: break-word;
   }
@@ -140,7 +140,7 @@
     .masthead img { width: 220px; }
     .fab { top: 16px; right: 16px; }
     .grid { flex: none; padding: 0 20px 48px; }
-    .grid-inner { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 16px; width: 100%; }
+    .grid-inner { grid-template-columns: 1fr !important; grid-auto-rows: auto !important; gap: 16px; width: 100%; }
     .card-wrap { min-height: 220px; }
   }
 </style>
@@ -247,6 +247,82 @@
 
   const EDIT_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>';
 
+  const CARD_W = 340;
+  const CARD_H = 255;
+  const GAP = 24;
+  const MIN_W = 200;
+
+  // Lay the cards out sideways: keep filling the row across, shrinking the cards
+  // as needed, and only start a second row once they'd drop below MIN_W.
+  function layout() {
+    const grid = document.getElementById("grid");
+    const n = sites.length;
+    if (!n) return;
+
+    const box = grid.parentElement;
+    const cs = getComputedStyle(box);
+    const availW = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const availH = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+
+    if (window.innerWidth <= 640) {
+      grid.style.removeProperty("grid-template-columns");
+      grid.style.removeProperty("grid-auto-rows");
+      grid.style.setProperty("--cw", availW + "px");
+      return;
+    }
+
+    const widthFor = (cols) => {
+      const rows = Math.ceil(n / cols);
+      const byWidth = (availW - (cols - 1) * GAP) / cols;
+      const byHeight = ((availH - (rows - 1) * GAP) / rows) * (CARD_W / CARD_H);
+      return Math.min(CARD_W, byWidth, byHeight);
+    };
+
+    // Widest row that still leaves the cards readable.
+    let cols = 0;
+    for (let c = n; c >= 1; c--) {
+      if (widthFor(c) >= MIN_W) { cols = c; break; }
+    }
+
+    if (cols) {
+      // Once it has wrapped, even the rows out so no card is left stranded.
+      cols = Math.ceil(n / Math.ceil(n / cols));
+    } else {
+      // Too many to keep readable — fall back to whatever fits largest.
+      let best = 1;
+      for (let c = 2; c <= n; c++) {
+        if (widthFor(c) >= widthFor(best)) best = c;
+      }
+      cols = best;
+    }
+
+    const w = widthFor(cols);
+    grid.style.gridTemplateColumns = "repeat(" + cols + ", " + w + "px)";
+    grid.style.gridAutoRows = (w * CARD_H / CARD_W) + "px";
+    grid.style.setProperty("--cw", w + "px");
+
+    fitNames();
+  }
+
+  const measure = document.createElement("canvas").getContext("2d");
+
+  // Names shrink to whatever the longest word needs, so nothing snaps mid-word.
+  function fitNames() {
+    document.querySelectorAll(".card .name").forEach((el) => {
+      el.style.removeProperty("font-size");
+      const avail = el.clientWidth;
+      if (!avail) return;
+      const size = parseFloat(getComputedStyle(el).fontSize);
+      measure.font = "800 " + size + "px Archivo, system-ui, sans-serif";
+      let widest = 0;
+      el.textContent.toUpperCase().split(/\s+/).forEach((word) => {
+        widest = Math.max(widest, measure.measureText(word).width);
+      });
+      const room = avail * 0.98;
+      if (widest > room) el.style.fontSize = Math.max(12, size * (room / widest)) + "px";
+    });
+  }
+
   function render() {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
@@ -307,6 +383,8 @@
       wrap.appendChild(editBtn);
       grid.appendChild(wrap);
     });
+
+    layout();
   }
 
   const overlay = document.getElementById("overlay");
@@ -386,6 +464,14 @@
     saveSites(sites);
     render();
     closeDialog();
+  });
+
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+
+  let layoutFrame = null;
+  window.addEventListener("resize", () => {
+    if (layoutFrame) cancelAnimationFrame(layoutFrame);
+    layoutFrame = requestAnimationFrame(() => { layoutFrame = null; layout(); });
   });
 
   render();
