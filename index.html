@@ -85,6 +85,8 @@
     overflow-wrap: break-word;
   }
   .card .rule { position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); width: 36px; height: 3px; }
+  .card.no-link { cursor: pointer; border-style: dashed; }
+  .card.no-link .name { opacity: 0.55; }
 
   .edit-btn {
     position: absolute; top: 16px; right: 18px; z-index: 2;
@@ -184,8 +186,10 @@
 
   const DEFAULT_SITES = [
     { name: "ProSup", desc: "Project workspace — jobs, crews and daily records in one place.", url: "prosup-jet.vercel.app" },
-    { name: "ITP Tracker", desc: "Site evidence: hold points, photographed and filed against the ITP.", url: "itptracker-weld-five.vercel.app" },
-    { name: "A2Z", desc: "Reference index — everything else, alphabetically.", url: "a2z-ecru.vercel.app" }
+    { name: "Tracker", desc: "Site evidence: hold points, photographed and filed against the ITP.", url: "itptracker-weld-five.vercel.app" },
+    { name: "Uniform", desc: "No description yet.", url: "" },
+    { name: "ProTrak", desc: "No description yet.", url: "" },
+    { name: "Checklist", desc: "No description yet.", url: "" }
   ];
 
   const LOOKS = [
@@ -328,7 +332,8 @@
     grid.innerHTML = "";
 
     sites.forEach((site, i) => {
-      const href = "https://" + site.url.replace(/^https?:\/\//, "");
+      const url = (site.url || "").trim();
+      const linked = url !== "" && url !== "—";
       const num = String(i + 1).padStart(2, "0");
       const look = LOOKS[i % LOOKS.length];
 
@@ -337,9 +342,21 @@
 
       const card = document.createElement("a");
       card.className = "card";
-      card.href = href;
-      card.target = "_blank";
-      card.rel = "noopener";
+      if (linked) {
+        card.href = "https://" + url.replace(/^https?:\/\//, "");
+        card.target = "_blank";
+        card.rel = "noopener";
+      } else {
+        // No link yet — the card itself opens the editor so it can be filled in here.
+        card.classList.add("no-link");
+        card.setAttribute("role", "button");
+        card.tabIndex = 0;
+        card.title = "Add a link";
+        card.addEventListener("click", (e) => { e.preventDefault(); openDialog(i); });
+        card.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openDialog(i); }
+        });
+      }
       card.style.background = look.surface;
       card.style.borderTop = "4px solid " + look.accent;
 
