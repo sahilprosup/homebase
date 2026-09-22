@@ -324,13 +324,36 @@
     });
   }
 
+  const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:\/\//i;
+
+  // Pasted addresses often carry stray spaces or invisible characters.
+  function cleanUrl(value) {
+    return String(value || "").replace(/[\u200B-\u200D\uFEFF]/g, "").replace(/\s+/g, "");
+  }
+
+  // Only https is implied. Any scheme typed out is kept as-is, so an http-only
+  // tool isn't silently upgraded to a URL that doesn't answer.
+  function hrefFor(value) {
+    const u = cleanUrl(value);
+    return HAS_SCHEME.test(u) ? u : "https://" + u.replace(/^\/+/, "");
+  }
+
+  // Stored bare when it's plain https, so the address stays tidy to read back.
+  function storeUrl(value) {
+    return cleanUrl(value).replace(/^https:\/\//i, "");
+  }
+
+  function isLinked(value) {
+    const u = storeUrl(value);
+    return u !== "" && u !== "—";
+  }
+
   function render() {
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
 
     sites.forEach((site, i) => {
-      const url = (site.url || "").trim();
-      const linked = url !== "" && url !== "—";
+      const linked = isLinked(site.url);
       const num = String(i + 1).padStart(2, "0");
       const look = LOOKS[i % LOOKS.length];
 
@@ -340,7 +363,7 @@
       const card = document.createElement("a");
       card.className = "card";
       if (linked) {
-        card.href = "https://" + url.replace(/^https?:\/\//, "");
+        card.href = hrefFor(site.url);
         card.target = "_blank";
         card.rel = "noopener";
       } else {
@@ -457,13 +480,13 @@
       sites[editIndex] = {
         name: name || url,
         desc: existing.desc || "No description yet.",
-        url: url.replace(/^https?:\/\//, "") || "—"
+        url: storeUrl(url) || "—"
       };
     } else {
       sites.push({
         name: name || url,
         desc: "No description yet.",
-        url: url.replace(/^https?:\/\//, "") || "—"
+        url: storeUrl(url) || "—"
       });
     }
 
