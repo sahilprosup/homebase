@@ -188,7 +188,7 @@
     { name: "ProSup", desc: "Project workspace — jobs, crews and daily records in one place.", url: "prosup-jet.vercel.app" },
     { name: "Tracker", desc: "Site evidence: hold points, photographed and filed against the ITP.", url: "itptracker-weld-five.vercel.app" },
     { name: "Uniform", desc: "No description yet.", url: "" },
-    { name: "ProTrak", desc: "No description yet.", url: "" },
+    { name: "ProTrak", desc: "No description yet.", url: "protrak-proline.netlify.app/project_tracker.html" },
     { name: "Checklist", desc: "No description yet.", url: "" }
   ];
 
@@ -285,13 +285,15 @@
       return Math.min(CARD_W, byWidth, byHeight);
     };
 
-    // Whichever row count draws the biggest cards; ties go to the flatter layout.
-    // Past two rows we only keep going if the cards are still too small to read.
+    // Whichever row count draws the biggest cards. Within two rows an equal-sized
+    // layout still wins, so a wide screen uses its height rather than one long
+    // strip — but only when both rows come out full, never to strand a card.
     let rows = 1;
     let w = widthFor(1);
     for (let r = 2; r <= n; r++) {
       const rw = widthFor(r);
-      if (rw > w) { rows = r; w = rw; }
+      const fillsEveryRow = r <= MAX_ROWS && n >= r * 2;
+      if (fillsEveryRow ? rw >= w - 0.5 : rw > w) { rows = r; w = rw; }
       if (r >= MAX_ROWS && w >= MIN_W) break;
     }
 
