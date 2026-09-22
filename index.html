@@ -256,8 +256,10 @@
   const GAP = 24;
   const MIN_W = 200;
 
-  // Lay the cards out sideways: keep filling the row across, shrinking the cards
-  // as needed, and only start a second row once they'd drop below MIN_W.
+  const MAX_ROWS = 2;
+
+  // Spread the cards over at most two rows, filling each row across. Two rows
+  // keeps the cards large and fits twice as many before they start shrinking.
   function layout() {
     const grid = document.getElementById("grid");
     const n = sites.length;
@@ -275,32 +277,25 @@
       return;
     }
 
-    const widthFor = (cols) => {
-      const rows = Math.ceil(n / cols);
+    // Rows are always filled evenly, so no card is left stranded on its own.
+    const widthFor = (rows) => {
+      const cols = Math.ceil(n / rows);
       const byWidth = (availW - (cols - 1) * GAP) / cols;
       const byHeight = ((availH - (rows - 1) * GAP) / rows) * (CARD_W / CARD_H);
       return Math.min(CARD_W, byWidth, byHeight);
     };
 
-    // Widest row that still leaves the cards readable.
-    let cols = 0;
-    for (let c = n; c >= 1; c--) {
-      if (widthFor(c) >= MIN_W) { cols = c; break; }
+    // Whichever row count draws the biggest cards; ties go to the flatter layout.
+    // Past two rows we only keep going if the cards are still too small to read.
+    let rows = 1;
+    let w = widthFor(1);
+    for (let r = 2; r <= n; r++) {
+      const rw = widthFor(r);
+      if (rw > w) { rows = r; w = rw; }
+      if (r >= MAX_ROWS && w >= MIN_W) break;
     }
 
-    if (cols) {
-      // Once it has wrapped, even the rows out so no card is left stranded.
-      cols = Math.ceil(n / Math.ceil(n / cols));
-    } else {
-      // Too many to keep readable — fall back to whatever fits largest.
-      let best = 1;
-      for (let c = 2; c <= n; c++) {
-        if (widthFor(c) >= widthFor(best)) best = c;
-      }
-      cols = best;
-    }
-
-    const w = widthFor(cols);
+    const cols = Math.ceil(n / rows);
     grid.style.gridTemplateColumns = "repeat(" + cols + ", " + w + "px)";
     grid.style.gridAutoRows = (w * CARD_H / CARD_W) + "px";
     grid.style.setProperty("--cw", w + "px");
