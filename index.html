@@ -185,6 +185,21 @@
   .way.dead:hover .rocker .slot{background:#070706; box-shadow:inset 0 1px 3px rgba(0,0,0,1)}
   .way.dead:hover .rocker .pad{bottom:5px; top:auto}
 
+  /* ── OFFLINE (wired, but the tool is down) ── */
+  .way.off{background:linear-gradient(180deg,#262322 0 5px,#1a1817 5px 9px,#151312 9px 100%)}
+  .way.off .engrave{color:#6d6866; text-shadow:0 -1px 1px rgba(0,0,0,0.9)}
+  .way.off .led{background:#3a1410; box-shadow:inset 0 0 3px rgba(0,0,0,0.85), 0 0 0 3px rgba(0,0,0,0.55)}
+  .way.off .lamp .txt{color:var(--red); font-weight:700}
+  .way.off .host{text-decoration:line-through; text-decoration-color:rgba(236,48,19,0.6)}
+  .way.off .rocker .pad{background:linear-gradient(180deg,#3b3735,#232020)}
+  .way.off:hover{transform:translateY(-3px); box-shadow:inset 0 1px 0 rgba(255,255,255,0.08), 0 20px 34px rgba(0,0,0,0.66), 0 0 0 1px rgba(236,48,19,0.35)}
+  .way.off:hover .engrave{color:#9b9491; text-shadow:0 -1px 1px rgba(0,0,0,0.9)}
+  .way.off:hover .led{background:#3a1410; box-shadow:inset 0 0 3px rgba(0,0,0,0.85), 0 0 0 3px rgba(0,0,0,0.55)}
+  .way.off:hover .lamp .txt{color:var(--hot)}
+  .way.off:hover .rocker .slot{background:#070706; box-shadow:inset 0 1px 3px rgba(0,0,0,1)}
+  .way.off:hover .rocker .pad{bottom:5px; top:auto}
+  .way.off:hover .sw .io{color:rgba(243,242,242,0.28)}
+
   /* ── SPARE WAY (the add button) ── */
   .way.spare{
     background:transparent; border:1.5px dashed rgba(243,242,242,0.16); box-shadow:none;
@@ -235,6 +250,9 @@
     box-shadow:inset 0 2px 5px rgba(0,0,0,0.8);
   }
   .field input:focus{border-color:rgba(236,48,19,0.6)}
+  .check{display:flex; align-items:center; gap:10px; cursor:pointer;
+         font-family:var(--mono); font-size:10px; letter-spacing:0.22em; color:rgba(243,242,242,0.5)}
+  .check input{width:16px; height:16px; margin:0; accent-color:var(--red); cursor:pointer}
   .modal-actions{display:flex; gap:10px; margin-top:26px}
   .btn-primary{
     height:42px; padding:0 20px; border:0; border-radius:5px; background:var(--red); color:var(--text);
@@ -307,6 +325,10 @@
         <span>Address</span>
         <input id="fUrl" type="text" placeholder="itptracker.vercel.app" maxlength="300">
       </label>
+      <label class="check">
+        <input id="fOffline" type="checkbox">
+        <span>MARK AS OFFLINE</span>
+      </label>
     </div>
     <div class="modal-actions">
       <button type="button" class="btn-primary" id="submitAdd">Add to board</button>
@@ -321,7 +343,7 @@
 
   const DEFAULT_SITES = [
     { name: "ProSup", desc: "Project workspace — jobs, crews and daily records in one place.", url: "prosup-jet.vercel.app" },
-    { name: "Tracker", desc: "Site evidence: hold points, photographed and filed against the ITP.", url: "itptracker-weld-five.vercel.app" },
+    { name: "Tracker", desc: "Site evidence: hold points, photographed and filed against the ITP.", url: "itptracker-weld-five.vercel.app", offline: true },
     { name: "Uniform", desc: "No description yet.", url: "" },
     { name: "ProTrak", desc: "No description yet.", url: "protrak-proline.netlify.app/project_tracker.html" },
     { name: "Checklist", desc: "No description yet.", url: "" }
@@ -333,6 +355,11 @@
       if (!raw) return DEFAULT_SITES.slice();
       const parsed = JSON.parse(raw);
       if (!Array.isArray(parsed) || parsed.length === 0) return DEFAULT_SITES.slice();
+      // Tracker went down before ways could be switched off; boards saved before
+      // then never recorded a state, so switch it off once here.
+      parsed.forEach((s) => {
+        if (s && !("offline" in s) && /^tracker$/i.test(String(s.name || "").trim())) s.offline = true;
+      });
       return parsed;
     } catch (e) {
       return DEFAULT_SITES.slice();
@@ -474,15 +501,17 @@
 
     sites.forEach((site, i) => {
       const linked = isLinked(site.url);
+      const off = linked && site.offline === true;
       const no = String(i + 1).padStart(2, "0");
 
       const way = document.createElement("a");
-      way.className = "way" + (linked ? "" : " dead");
+      way.className = "way" + (linked ? (off ? " off" : "") : " dead");
 
       if (linked) {
         way.href = hrefFor(site.url);
         way.target = "_blank";
         way.rel = "noopener";
+        if (off) way.title = site.name + " is offline";
       } else {
         // No address yet — the plate itself opens the editor so it can be wired here.
         way.setAttribute("role", "button");
@@ -497,7 +526,7 @@
       way.innerHTML =
         SCREWS +
         '<div class="top"><span class="way-no">WAY ' + no + '</span>' +
-          '<span class="lamp"><span class="txt">' + (linked ? "LIVE" : "NOT WIRED") + '</span>' +
+          '<span class="lamp"><span class="txt">' + (linked ? (off ? "OFFLINE" : "LIVE") : "NOT WIRED") + '</span>' +
           '<span class="led"></span></span></div>' +
         '<div><div class="engrave"></div><div class="host"></div></div>' +
         '<div class="bottom">' + ROCKER + '</div>';
@@ -536,12 +565,15 @@
     });
     rack.appendChild(spare);
 
-    const live = sites.filter((s) => isLinked(s.url)).length;
-    const dead = sites.length - live;
+    const wired = sites.filter((s) => isLinked(s.url));
+    const offline = wired.filter((s) => s.offline === true).length;
+    const live = wired.length - offline;
+    const dead = sites.length - wired.length;
     document.getElementById("read").innerHTML =
-      "MELBOURNE · SYDNEY<br><b>MAIN ON</b> · " + live + " WAY" + (live === 1 ? "" : "S") + " LIVE";
+      "MELBOURNE · SYDNEY<br><b>MAIN ON</b> · " + live + " WAY" + (live === 1 ? "" : "S") + " LIVE" +
+      (offline ? " · " + offline + " OFFLINE" : "");
     document.getElementById("tally").textContent =
-      live + " LIVE · " + dead + " NOT WIRED · 1 SPARE";
+      live + " LIVE · " + (offline ? offline + " OFFLINE · " : "") + dead + " NOT WIRED · 1 SPARE";
 
     layout();
   }
@@ -551,6 +583,7 @@
   const overlay = document.getElementById("overlay");
   const fName = document.getElementById("fName");
   const fUrl = document.getElementById("fUrl");
+  const fOffline = document.getElementById("fOffline");
   const modalTitle = document.getElementById("modalTitle");
   const modalSubcopy = document.getElementById("modalSubcopy");
   const submitBtn = document.getElementById("submitAdd");
@@ -558,7 +591,7 @@
 
   let editIndex = null;
 
-  function resetForm() { fName.value = ""; fUrl.value = ""; }
+  function resetForm() { fName.value = ""; fUrl.value = ""; fOffline.checked = false; }
 
   function openDialog(index) {
     editIndex = (typeof index === "number") ? index : null;
@@ -568,6 +601,7 @@
       const site = sites[editIndex];
       fName.value = site.name || "";
       fUrl.value = isLinked(site.url) ? site.url : "";
+      fOffline.checked = site.offline === true;
       modalTitle.textContent = "Edit way";
       modalSubcopy.textContent = "CHANGES SAVE STRAIGHT AWAY";
       submitBtn.textContent = "Save changes";
@@ -604,13 +638,15 @@
       sites[editIndex] = {
         name: name || url,
         desc: existing.desc || "No description yet.",
-        url: storeUrl(url) || "—"
+        url: storeUrl(url) || "—",
+        offline: fOffline.checked
       };
     } else {
       sites.push({
         name: name || url,
         desc: "No description yet.",
-        url: storeUrl(url) || "—"
+        url: storeUrl(url) || "—",
+        offline: fOffline.checked
       });
     }
 
