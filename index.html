@@ -2,7 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#100f0e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Switchboard">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png">
 <title>Switchboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,6 +87,8 @@
       0 16px 30px rgba(0,0,0,0.62);
     display:flex; flex-direction:column; justify-content:space-between;
     text-decoration:none; color:inherit; cursor:pointer;
+    -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none;
+    touch-action:manipulation;
     transition:transform .17s cubic-bezier(.2,.7,.3,1), box-shadow .17s ease;
   }
   .screw{
@@ -147,7 +157,7 @@
   .edit-btn:hover{opacity:1; border-color:rgba(236,48,19,0.5)}
 
   /* ── THROWN (hover / focus) ── */
-  .way:hover, .way:focus-visible{
+  .way.thrown{
     transform:translateY(-6px);
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,0.13),
@@ -156,22 +166,22 @@
       0 0 0 1px rgba(236,48,19,0.6),
       0 0 46px rgba(236,48,19,0.34);
   }
-  .way:hover .engrave, .way:focus-visible .engrave{
+  .way.thrown .engrave{
     color:#fff; text-shadow:0 0 26px rgba(236,48,19,0.6), 0 1px 0 rgba(255,255,255,0.2);
   }
-  .way:hover .led, .way:focus-visible .led{
+  .way.thrown .led{
     background:var(--hot);
     box-shadow:0 0 20px rgba(255,86,60,1), 0 0 40px rgba(255,86,60,0.65),
                inset 0 0 3px rgba(255,255,255,0.8), 0 0 0 3px rgba(0,0,0,0.55), 0 0 0 4px rgba(255,86,60,0.25);
   }
-  .way:hover .lamp .txt, .way:focus-visible .lamp .txt{color:var(--hot)}
-  .way:hover .way-no, .way:focus-visible .way-no{color:var(--hot); border-color:rgba(236,48,19,0.5)}
-  .way:hover .rocker .slot, .way:focus-visible .rocker .slot{
+  .way.thrown .lamp .txt{color:var(--hot)}
+  .way.thrown .way-no{color:var(--hot); border-color:rgba(236,48,19,0.5)}
+  .way.thrown .rocker .slot{
     background:linear-gradient(180deg,var(--hot),#a81200);
     box-shadow:inset 0 0 10px rgba(255,150,120,0.5), 0 0 18px rgba(236,48,19,0.75);
   }
-  .way:hover .rocker .pad, .way:focus-visible .rocker .pad{bottom:auto; top:5px}
-  .way:hover .sw .io, .way:focus-visible .sw .io{color:rgba(255,120,95,0.65)}
+  .way.thrown .rocker .pad{bottom:auto; top:5px}
+  .way.thrown .sw .io{color:rgba(255,120,95,0.65)}
 
   /* ── NOT WIRED (no address saved yet) ── */
   .way.dead{background:linear-gradient(180deg,#262322 0 5px,#1a1817 5px 9px,#151312 9px 100%)}
@@ -180,10 +190,10 @@
   .way.dead .lamp .txt{color:var(--amber)}
   .way.dead .rocker .pad{background:linear-gradient(180deg,#3b3735,#232020)}
   .way.dead .host{color:var(--amber); opacity:0.7}
-  .way.dead:hover .engrave{color:#9b9491; text-shadow:0 -1px 1px rgba(0,0,0,0.9)}
-  .way.dead:hover .led{background:var(--amber); box-shadow:0 0 16px rgba(232,161,58,0.8), 0 0 0 3px rgba(0,0,0,0.55)}
-  .way.dead:hover .rocker .slot{background:#070706; box-shadow:inset 0 1px 3px rgba(0,0,0,1)}
-  .way.dead:hover .rocker .pad{bottom:5px; top:auto}
+  .way.dead.thrown .engrave{color:#9b9491; text-shadow:0 -1px 1px rgba(0,0,0,0.9)}
+  .way.dead.thrown .led{background:var(--amber); box-shadow:0 0 16px rgba(232,161,58,0.8), 0 0 0 3px rgba(0,0,0,0.55)}
+  .way.dead.thrown .rocker .slot{background:#070706; box-shadow:inset 0 1px 3px rgba(0,0,0,1)}
+  .way.dead.thrown .rocker .pad{bottom:5px; top:auto}
 
   /* ── SPARE WAY (the add button) ── */
   .way.spare{
@@ -196,12 +206,12 @@
     display:grid; place-items:center; font-size:30px; color:rgba(243,242,242,0.5); margin-bottom:16px;
   }
   .way.spare .cap{font-family:var(--mono); font-size:11px; letter-spacing:0.3em; color:rgba(243,242,242,0.34)}
-  .way.spare:hover{
+  .way.spare.thrown{
     border-color:rgba(236,48,19,0.55); transform:translateY(-4px);
     box-shadow:0 0 34px rgba(236,48,19,0.18);
   }
-  .way.spare:hover .plus{border-color:var(--red); color:var(--hot)}
-  .way.spare:hover .cap{color:var(--hot)}
+  .way.spare.thrown .plus{border-color:var(--red); color:var(--hot)}
+  .way.spare.thrown .cap{color:var(--hot)}
 
   /* ─── footer telemetry ────────────────────────────────────── */
   footer{
@@ -255,25 +265,74 @@
   .btn-remove:hover{color:var(--hot)}
   .btn-remove[hidden]{display:none}
 
-  /* ─── mobile ──────────────────────────────────────────────── */
-  @media (max-width:760px){
+  /* ─── compact: phones, tablets, and any short window ──────── */
+  /* Keyed to the same test the layout script uses, so the two can't drift. */
+  @media (max-width:1024px), (max-height:560px){
     html,body{height:auto}
     body{overflow:visible}
-    header{grid-template-columns:1fr; gap:14px; text-align:center; padding:20px 18px 16px}
-    header img{height:42px; justify-self:center}
-    .title{gap:12px}
-    .title h1{font-size:21px; letter-spacing:0.2em}
-    .title .bar{width:26px; height:3px}
+
+    header{
+      grid-template-columns:1fr; gap:12px; text-align:center;
+      padding:max(16px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) 14px max(18px,env(safe-area-inset-left));
+    }
+    header img{height:46px; justify-self:center}
+    .title{gap:14px; justify-self:center}
+    .title h1{font-size:22px; letter-spacing:0.2em}
+    .title .bar{width:28px; height:3px}
     .read{justify-self:center; text-align:center}
-    main{padding:18px; place-items:start}
-    .rack{grid-template-columns:1fr !important; grid-auto-rows:186px !important; gap:16px; width:100%}
+
+    main{
+      padding:18px max(18px,env(safe-area-inset-right)) 18px max(18px,env(safe-area-inset-left));
+      place-items:start stretch;
+    }
+    /* One column on a phone, two as soon as there's room for them. */
+    .rack{
+      grid-template-columns:repeat(auto-fit,minmax(286px,1fr)) !important;
+      grid-auto-rows:auto !important; gap:14px; width:100%;
+    }
     .rail{display:none}
-    .way{border-radius:6px}
+    .way{height:auto; min-height:172px; border-radius:6px}
+    .way.spare{min-height:116px}
+    .way.spare .plus{margin-bottom:12px}
+
+    footer{
+      grid-template-columns:1fr; text-align:center; gap:0;
+      padding:4px max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));
+    }
+    footer div,footer .mid,footer .end{text-align:center; padding:5px 0}
+  }
+
+  /* Tight phone: give the label and the switch more of the plate. */
+  @media (max-width:430px){
+    main{padding-top:14px}
+    .way{min-height:160px}
     .host{font-size:9px; margin-top:7px}
-    .rocker{width:42px; height:32px}
-    .rocker .pad{height:13px}
-    footer{grid-template-columns:1fr; text-align:center; padding:6px 18px 22px}
-    footer div,footer .mid,footer .end{text-align:center; padding:6px 0}
+    .rocker{width:44px; height:34px}
+    .rocker .pad{height:14px}
+    .title h1{font-size:19px}
+    header img{height:40px}
+  }
+
+  /* Landscape phone: little height to spare, so trim the chrome. */
+  @media (max-height:460px) and (orientation:landscape){
+    header{padding-top:10px; padding-bottom:10px; gap:8px}
+    header img{height:34px}
+    .title h1{font-size:17px}
+    main{padding-top:12px; padding-bottom:12px}
+    .way{min-height:150px}
+  }
+
+  /* No cursor: never leave a plate stuck in the thrown state. */
+  @media (hover:none){
+    .way:active{transform:translateY(-3px)}
+  }
+
+  /* Finger-sized controls on any touch screen, phone or tablet. */
+  @media (pointer:coarse){
+    .edit-btn{width:40px; height:40px; opacity:0.6}
+    .field input{height:48px; font-size:16px}  /* 16px stops iOS zooming on focus */
+    .btn-primary,.btn-secondary{height:48px}
+    .btn-remove{padding:10px 0}
   }
 </style>
 </head>
@@ -373,6 +432,10 @@
 
   /* ─── layout ────────────────────────────────────────────── */
 
+  // Same test as the compact media query — change both together.
+  const COMPACT = "(max-width:1024px), (max-height:560px)";
+  const isCompact = () => window.matchMedia(COMPACT).matches;
+
   const CARD_W = 520;
   const CARD_H = 318;
   const GAP = 32;
@@ -390,11 +453,15 @@
     const availW = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     const availH = box.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
 
-    if (window.innerWidth <= 760) {
+    if (isCompact()) {
+      // Let the CSS flow the plates; just report the real plate width back so
+      // the label sizing has something true to scale against.
       rack.style.removeProperty("grid-template-columns");
       rack.style.removeProperty("grid-auto-rows");
-      rack.style.setProperty("--cw", availW + "px");
-      drawRails(1, 0);
+      drawRails(0, 0);
+      const first = rack.querySelector(".way");
+      const plateW = first ? first.getBoundingClientRect().width : availW;
+      rack.style.setProperty("--cw", Math.round(plateW) + "px");
       fitNames();
       return;
     }
@@ -627,9 +694,32 @@
     closeDialog();
   });
 
+  // Hover is applied as a class rather than :hover — a tap on a touch screen
+  // latches :hover until you tap elsewhere, leaving a plate stuck lit.
+  const canHover = window.matchMedia("(hover:hover)").matches;
+  const rackEl = document.getElementById("rack");
+  const throwWay = (el, on) => { if (el) el.classList.toggle("thrown", on); };
+
+  if (canHover) {
+    rackEl.addEventListener("pointerover", (e) => {
+      if (e.pointerType === "touch") return;
+      throwWay(e.target.closest(".way"), true);
+    });
+    rackEl.addEventListener("pointerout", (e) => {
+      const way = e.target.closest(".way");
+      if (way && !way.contains(e.relatedTarget)) throwWay(way, false);
+    });
+  }
+  rackEl.addEventListener("focusin", (e) => throwWay(e.target.closest(".way"), true));
+  rackEl.addEventListener("focusout", (e) => {
+    const way = e.target.closest(".way");
+    if (way && !way.contains(e.relatedTarget)) throwWay(way, false);
+  });
+
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
 
   let layoutFrame = null;
+  window.addEventListener("orientationchange", () => setTimeout(layout, 180));
   window.addEventListener("resize", () => {
     if (layoutFrame) cancelAnimationFrame(layoutFrame);
     layoutFrame = requestAnimationFrame(() => { layoutFrame = null; layout(); });
