@@ -61,7 +61,7 @@
   }
   /* DIN rails sit behind the top edge of each row */
   .rail{
-    position:absolute; left:-30px; right:-30px; height:10px; border-radius:2px; z-index:0;
+    position:absolute; left:-18px; right:-18px; height:10px; border-radius:2px; z-index:0;
     background:linear-gradient(180deg,#2e2b29,#141211 60%,#0b0a0a);
     box-shadow:inset 0 1px 0 rgba(255,255,255,0.07), 0 2px 6px rgba(0,0,0,0.7);
   }
@@ -98,10 +98,14 @@
   .lamp{display:flex; align-items:center; gap:9px}
   .lamp .txt{font-family:var(--mono); font-size:9px; letter-spacing:0.2em; color:rgba(243,242,242,0.34); white-space:nowrap}
   .led{
-    width:11px; height:11px; border-radius:50%; background:var(--red); flex:none;
-    box-shadow:0 0 11px rgba(236,48,19,0.95), inset 0 0 3px rgba(255,255,255,0.55),
+    width:9px; height:9px; border-radius:50%; background:#c8290f; flex:none;
+    box-shadow:0 0 7px rgba(236,48,19,0.6), inset 0 0 2px rgba(255,255,255,0.45),
                0 0 0 3px rgba(0,0,0,0.55), 0 0 0 4px rgba(255,255,255,0.07);
+    animation:hum 3.2s ease-in-out infinite;
   }
+  @keyframes hum{50%{box-shadow:0 0 12px rgba(236,48,19,0.85), inset 0 0 2px rgba(255,255,255,0.45),
+                               0 0 0 3px rgba(0,0,0,0.55), 0 0 0 4px rgba(255,255,255,0.07)}}
+  @media (prefers-reduced-motion:reduce){ .led{animation:none} }
 
   /* engraved label — cut into the face, not printed on it */
   .engrave{
@@ -110,19 +114,33 @@
     color:#eceae9; overflow-wrap:break-word;
     text-shadow:0 -1px 1px rgba(0,0,0,0.92), 0 1px 0 rgba(255,255,255,0.10);
   }
+  .body{flex:1; display:flex; flex-direction:column; justify-content:flex-end; min-height:0; padding-bottom:clamp(10px,calc(var(--cw,520px)*0.03),16px)}
+  .desc{
+    margin-top:clamp(6px,calc(var(--cw,520px)*0.02),10px); font-size:clamp(12px,calc(var(--cw,520px)*0.027),14px);
+    line-height:1.4; color:rgba(243,242,242,0.5); max-width:34em;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .desc:empty{display:none}
   .host{
-    font-family:var(--mono); font-size:10px; letter-spacing:0.14em; margin-top:10px;
-    color:rgba(243,242,242,0.3); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    flex:1; min-width:0; font-family:var(--mono); font-size:11px; letter-spacing:0.04em;
+    color:rgba(243,242,242,0.46); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
 
-  .bottom{display:flex; align-items:flex-end; justify-content:space-between; gap:10px}
+  .bottom{
+    display:flex; align-items:center; gap:14px; padding-top:clamp(10px,calc(var(--cw,520px)*0.03),14px);
+    border-top:1px solid rgba(0,0,0,0.6); box-shadow:inset 0 1px 0 rgba(255,255,255,0.045);
+  }
+  .go{
+    flex:none; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:0.2em;
+    color:rgba(243,242,242,0.32); white-space:nowrap; transition:color .13s linear;
+  }
   .sw{display:flex; align-items:center; gap:11px}
   .sw .io{
     font-family:var(--mono); font-size:9px; line-height:1.5; letter-spacing:0.1em;
     color:rgba(243,242,242,0.28); text-align:center;
   }
   .rocker{
-    width:52px; height:40px; border-radius:5px; position:relative; flex:none;
+    width:44px; height:34px; border-radius:5px; position:relative; flex:none;
     background:#0d0c0b; border:1px solid rgba(0,0,0,0.9);
     box-shadow:inset 0 3px 7px rgba(0,0,0,0.95), 0 1px 0 rgba(255,255,255,0.05);
   }
@@ -132,19 +150,26 @@
     background:#070706; box-shadow:inset 0 1px 3px rgba(0,0,0,1); transition:all .17s ease;
   }
   .rocker .pad{
-    position:absolute; left:5px; right:5px; bottom:5px; height:17px; border-radius:3px;
+    position:absolute; left:5px; right:5px; bottom:5px; height:14px; border-radius:3px;
     background:linear-gradient(180deg,#4e4946,#2a2725);
     box-shadow:0 -2px 4px rgba(0,0,0,0.75), inset 0 1px 0 rgba(255,255,255,0.12);
     transition:all .17s cubic-bezier(.2,.7,.3,1);
   }
+  .rocker .pad::after{
+    content:""; position:absolute; left:30%; right:30%; top:50%; height:2px; margin-top:-1px; border-radius:1px;
+    background:rgba(0,0,0,0.45); box-shadow:0 1px 0 rgba(255,255,255,0.08);
+  }
 
   .edit-btn{
-    width:30px; height:30px; border-radius:4px; flex:none;
+    height:30px; border-radius:4px; flex:none;
     display:flex; align-items:center; justify-content:center;
     background:rgba(0,0,0,0.4); border:1px solid var(--line); color:var(--text);
-    opacity:0.45; cursor:pointer; transition:opacity .13s linear, border-color .13s linear;
+    opacity:0; cursor:pointer; transition:opacity .13s linear, border-color .13s linear, width .17s ease, margin .17s ease;
+    width:0; margin-left:-14px; border-width:0; overflow:hidden;
   }
-  .edit-btn:hover{opacity:1; border-color:rgba(236,48,19,0.5)}
+  .way:hover .edit-btn, .way:focus-within .edit-btn{opacity:0.6; width:30px; margin-left:0; border-width:1px}
+  @media (hover:none){ .way .edit-btn{opacity:0.5; width:30px; margin-left:0; border-width:1px} }
+  .way .edit-btn:hover{opacity:1; border-color:rgba(236,48,19,0.5)}
 
   /* ── THROWN (hover / focus) ── */
   .way:hover, .way:focus-visible{
@@ -172,11 +197,14 @@
   }
   .way:hover .rocker .pad, .way:focus-visible .rocker .pad{bottom:auto; top:5px}
   .way:hover .sw .io, .way:focus-visible .sw .io{color:rgba(255,120,95,0.65)}
+  .way:hover .go, .way:focus-visible .go{color:var(--hot)}
+  .way:hover .host, .way:focus-visible .host{color:rgba(243,242,242,0.7)}
 
   /* ── NOT WIRED (no address saved yet) ── */
   .way.dead{background:linear-gradient(180deg,#262322 0 5px,#1a1817 5px 9px,#151312 9px 100%)}
   .way.dead .engrave{color:#6d6866; text-shadow:0 -1px 1px rgba(0,0,0,0.9)}
-  .way.dead .led{background:#4a4543; box-shadow:inset 0 0 3px rgba(0,0,0,0.8), 0 0 0 3px rgba(0,0,0,0.55)}
+  .way.dead .led{background:#4a4543; animation:none; box-shadow:inset 0 0 3px rgba(0,0,0,0.8), 0 0 0 3px rgba(0,0,0,0.55)}
+  .way.dead .go{color:rgba(232,161,58,0.55)}
   .way.dead .lamp .txt{color:var(--amber)}
   .way.dead .rocker .pad{background:linear-gradient(180deg,#3b3735,#232020)}
   .way.dead .host{color:var(--amber); opacity:0.7}
@@ -187,7 +215,7 @@
 
   /* ── SPARE WAY (the add button) ── */
   .way.spare{
-    background:transparent; border:1.5px dashed rgba(243,242,242,0.16); box-shadow:none;
+    background:rgba(255,255,255,0.012); border:1.5px dashed rgba(243,242,242,0.11); box-shadow:none;
     align-items:center; justify-content:center; text-align:center;
   }
   .way.spare .plus{
@@ -227,6 +255,7 @@
                   color:rgba(243,242,242,0.45)}
   .fields{display:flex; flex-direction:column; gap:18px}
   .field{display:flex; flex-direction:column}
+  .field span em{font-style:normal; opacity:0.55; margin-left:6px}
   .field span{font-family:var(--mono); font-size:10px; letter-spacing:0.22em; text-transform:uppercase;
               color:rgba(243,242,242,0.5); margin-bottom:9px}
   .field input{
@@ -266,12 +295,13 @@
     .title .bar{width:26px; height:3px}
     .read{justify-self:center; text-align:center}
     main{padding:18px; place-items:start}
-    .rack{grid-template-columns:1fr !important; grid-auto-rows:186px !important; gap:16px; width:100%}
+    .rack{grid-template-columns:minmax(0,1fr) !important; grid-auto-rows:auto !important; gap:16px; width:100%}
     .rail{display:none}
-    .way{border-radius:6px}
-    .host{font-size:9px; margin-top:7px}
-    .rocker{width:42px; height:32px}
-    .rocker .pad{height:13px}
+    .way{border-radius:6px; min-height:178px}
+    .way.spare{min-height:120px}
+    .host{font-size:10px}
+    .rocker{width:38px; height:30px}
+    .rocker .pad{height:12px}
     footer{grid-template-columns:1fr; text-align:center; padding:6px 18px 22px}
     footer div,footer .mid,footer .end{text-align:center; padding:6px 0}
   }
@@ -306,6 +336,10 @@
       <label class="field">
         <span>Address</span>
         <input id="fUrl" type="text" placeholder="itptracker.vercel.app" maxlength="300">
+      </label>
+      <label class="field">
+        <span>Note <em>optional</em></span>
+        <input id="fDesc" type="text" placeholder="Hold points, photographed and filed against the ITP" maxlength="120">
       </label>
     </div>
     <div class="modal-actions">
@@ -366,6 +400,18 @@
     return cleanUrl(value).replace(/^https:\/\//i, "");
   }
 
+  // What's printed on the plate: just where it lives, without the scheme or page.
+  function hostFor(value) {
+    const u = cleanUrl(value).replace(HAS_SCHEME, "").replace(/^\/+/, "");
+    return u.split(/[/?#]/)[0].replace(/^www\./i, "").toLowerCase();
+  }
+
+  const NO_DESC = "No description yet.";
+  function noteFor(site) {
+    const d = String(site.desc || "").trim();
+    return d === NO_DESC ? "" : d;
+  }
+
   function isLinked(value) {
     const u = storeUrl(value);
     return u !== "" && u !== "—";
@@ -374,7 +420,7 @@
   /* ─── layout ────────────────────────────────────────────── */
 
   const CARD_W = 520;
-  const CARD_H = 318;
+  const CARD_H = 290;
   const GAP = 32;
   const MIN_W = 340;
   const MAX_ROWS = 2;
@@ -499,13 +545,14 @@
         '<div class="top"><span class="way-no">WAY ' + no + '</span>' +
           '<span class="lamp"><span class="txt">' + (linked ? "LIVE" : "NOT WIRED") + '</span>' +
           '<span class="led"></span></span></div>' +
-        '<div><div class="engrave"></div><div class="host"></div></div>' +
-        '<div class="bottom">' + ROCKER + '</div>';
+        '<div class="body"><div class="engrave"></div><div class="desc"></div></div>' +
+        '<div class="bottom">' + ROCKER + '<span class="host"></span>' +
+          '<span class="go">' + (linked ? "OPEN ↗" : "WIRE IT") + '</span></div>';
 
       way.querySelector(".engrave").textContent = site.name;
-      way.querySelector(".host").textContent = linked
-        ? storeUrl(site.url).toUpperCase()
-        : "NO LINK SET — CLICK TO WIRE";
+      way.querySelector(".desc").textContent = noteFor(site);
+      way.querySelector(".host").textContent = linked ? hostFor(site.url) : "no address set";
+      if (linked) way.title = storeUrl(site.url);
 
       const editBtn = document.createElement("button");
       editBtn.type = "button";
@@ -551,6 +598,7 @@
   const overlay = document.getElementById("overlay");
   const fName = document.getElementById("fName");
   const fUrl = document.getElementById("fUrl");
+  const fDesc = document.getElementById("fDesc");
   const modalTitle = document.getElementById("modalTitle");
   const modalSubcopy = document.getElementById("modalSubcopy");
   const submitBtn = document.getElementById("submitAdd");
@@ -558,7 +606,7 @@
 
   let editIndex = null;
 
-  function resetForm() { fName.value = ""; fUrl.value = ""; }
+  function resetForm() { fName.value = ""; fUrl.value = ""; fDesc.value = ""; }
 
   function openDialog(index) {
     editIndex = (typeof index === "number") ? index : null;
@@ -568,6 +616,7 @@
       const site = sites[editIndex];
       fName.value = site.name || "";
       fUrl.value = isLinked(site.url) ? site.url : "";
+      fDesc.value = noteFor(site);
       modalTitle.textContent = "Edit way";
       modalSubcopy.textContent = "CHANGES SAVE STRAIGHT AWAY";
       submitBtn.textContent = "Save changes";
@@ -596,20 +645,20 @@
   submitBtn.addEventListener("click", () => {
     const name = fName.value.trim();
     const url = fUrl.value.trim();
+    const desc = fDesc.value.trim();
 
     if (!name && !url) { closeDialog(); return; }
 
     if (editIndex !== null) {
-      const existing = sites[editIndex];
       sites[editIndex] = {
         name: name || url,
-        desc: existing.desc || "No description yet.",
+        desc: desc || NO_DESC,
         url: storeUrl(url) || "—"
       };
     } else {
       sites.push({
         name: name || url,
-        desc: "No description yet.",
+        desc: desc || NO_DESC,
         url: storeUrl(url) || "—"
       });
     }
